@@ -1,17 +1,27 @@
-from langchain.chat_models import init_chat_model
-import os
+import pickle
+import sys
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyB_rB13i6lJ5R7dN1kG3MpsmKSED9ZErFo"
+print("ML CI Pipeline")
 
-# Correct syntax: use model_provider as keyword argument
-model = init_chat_model("gemini-2.5-flash-lite", model_provider="google_genai")
+X = np.array([[1], [2], [3]])
+y = np.array([2, 4, 6])
 
-promptA = "Suggest a unique name for a white cat."
-promptB = "Give one creative cat name for a white-colored kitten."
+model = LinearRegression()
+model.fit(X, y)
+print("Model trained")
 
-responseA = model.invoke(promptA).content
-responseB = model.invoke(promptB).content
+with open("model.pkl", "wb") as f:
+    pickle.dump(model, f)
+print("Model saved")
 
-print(f"Response A: {responseA}")
-print()
-print(f"Response B: {responseB}")
+prediction = model.predict([[4]])
+print(f"Prediction: {prediction[0]:.1f} (Expected: 8.0)")
+
+if abs(prediction - 8.0) < 0.1:
+    print("VALIDATION PASSED")
+    sys.exit(0)
+else:
+    print("VALIDATION FAILED")
+    sys.exit(1)
